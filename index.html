@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b1117">
+  <title>FinanceFlow — Controle Financeiro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark"><i data-lucide="wallet-cards"></i></div>
+        <div><strong>FinanceFlow</strong><span>Controle inteligente</span></div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-item active" data-section="dashboard"><i data-lucide="layout-dashboard"></i>Dashboard</button>
+        <button class="nav-item" data-section="transactions"><i data-lucide="arrow-left-right"></i>Movimentações</button>
+        <button class="nav-item" data-section="categories"><i data-lucide="tags"></i>Categorias</button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="tip">
+          <i data-lucide="lightbulb"></i>
+          <div><strong>Dica</strong><p>Registre suas movimentações diariamente para manter o controle.</p></div>
+        </div>
+        <button class="nav-item" id="clearData"><i data-lucide="trash-2"></i>Limpar dados</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-btn mobile-menu" id="mobileMenu" aria-label="Abrir menu"><i data-lucide="menu"></i></button>
+        <div>
+          <p class="eyebrow">Visão geral</p>
+          <h1>Minhas finanças</h1>
+        </div>
+        <button class="primary-btn" id="openModal"><i data-lucide="plus"></i><span>Novo lançamento</span></button>
+      </header>
+
+      <section class="content">
+        <div id="dashboard" class="section active-section">
+          <div class="month-toolbar">
+            <div>
+              <h2>Resumo financeiro</h2>
+              <p id="currentPeriod">Este mês</p>
+            </div>
+            <input type="month" id="monthFilter">
+          </div>
+
+          <div class="cards">
+            <article class="stat-card balance-card">
+              <div class="stat-icon"><i data-lucide="wallet"></i></div>
+              <div><span>Saldo do período</span><strong id="balance">R$ 0,00</strong><small id="balanceStatus">Sem movimentações</small></div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-icon income"><i data-lucide="trending-up"></i></div>
+              <div><span>Entradas</span><strong id="income">R$ 0,00</strong><small>Receitas recebidas</small></div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-icon expense"><i data-lucide="trending-down"></i></div>
+              <div><span>Saídas</span><strong id="expense">R$ 0,00</strong><small>Despesas realizadas</small></div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-icon saving"><i data-lucide="piggy-bank"></i></div>
+              <div><span>Taxa de economia</span><strong id="savingRate">0%</strong><small>Entradas que sobraram</small></div>
+            </article>
+          </div>
+
+          <div class="grid-2">
+            <article class="panel chart-panel">
+              <div class="panel-head"><div><h3>Fluxo financeiro</h3><p>Entradas e saídas por dia</p></div><i data-lucide="bar-chart-3"></i></div>
+              <div class="chart-wrap"><canvas id="flowChart"></canvas></div>
+            </article>
+            <article class="panel chart-panel">
+              <div class="panel-head"><div><h3>Gastos por categoria</h3><p>Distribuição das suas despesas</p></div><i data-lucide="pie-chart"></i></div>
+              <div class="chart-wrap donut-wrap"><canvas id="categoryChart"></canvas></div>
+              <div id="categoryLegend" class="legend"></div>
+            </article>
+          </div>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div><h3>Últimas movimentações</h3><p>Os lançamentos mais recentes</p></div>
+              <button class="text-btn" data-section="transactions">Ver todas <i data-lucide="arrow-right"></i></button>
+            </div>
+            <div id="recentTransactions" class="transaction-list"></div>
+          </article>
+        </div>
+
+        <div id="transactions" class="section">
+          <div class="page-heading">
+            <div><p class="eyebrow">Controle</p><h2>Movimentações</h2><p>Gerencie todas as suas entradas e saídas.</p></div>
+            <button class="primary-btn" id="openModal2"><i data-lucide="plus"></i>Novo lançamento</button>
+          </div>
+          <article class="panel">
+            <div class="filters">
+              <div class="search"><i data-lucide="search"></i><input id="search" placeholder="Buscar lançamento..."></div>
+              <select id="typeFilter"><option value="all">Todos os tipos</option><option value="income">Entradas</option><option value="expense">Saídas</option></select>
+              <select id="categoryFilter"><option value="all">Todas as categorias</option></select>
+            </div>
+            <div id="allTransactions" class="transaction-list"></div>
+          </article>
+        </div>
+
+        <div id="categories" class="section">
+          <div class="page-heading">
+            <div><p class="eyebrow">Organização</p><h2>Categorias</h2><p>Organize seus gastos de forma simples.</p></div>
+            <button class="primary-btn" id="addCategory"><i data-lucide="plus"></i>Nova categoria</button>
+          </div>
+          <div id="categoryCards" class="category-grid"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+  <div class="modal" id="transactionModal" role="dialog" aria-modal="true">
+    <div class="modal-head"><div><h2>Novo lançamento</h2><p>Registre uma entrada ou saída.</p></div><button class="icon-btn" id="closeModal"><i data-lucide="x"></i></button></div>
+    <form id="transactionForm">
+      <div class="type-toggle">
+        <label><input type="radio" name="type" value="income" checked><span><i data-lucide="arrow-down-left"></i> Entrada</span></label>
+        <label><input type="radio" name="type" value="expense"><span><i data-lucide="arrow-up-right"></i> Saída</span></label>
+      </div>
+      <label>Descrição<input name="description" required maxlength="80" placeholder="Ex.: Salário, supermercado..."></label>
+      <div class="form-grid">
+        <label>Valor<input name="amount" required type="number" min="0.01" step="0.01" placeholder="0,00"></label>
+        <label>Data<input name="date" required type="date"></label>
+      </div>
+      <div class="form-grid">
+        <label>Categoria<select name="category" id="modalCategory"></select></label>
+        <label>Pagamento<select name="payment"><option>Pix</option><option>Cartão de débito</option><option>Cartão de crédito</option><option>Dinheiro</option><option>Transferência</option><option>Outro</option></select></label>
+      </div>
+      <label>Observação<textarea name="note" rows="3" placeholder="Opcional"></textarea></label>
+      <button class="primary-btn submit-btn" type="submit"><i data-lucide="check"></i>Salvar lançamento</button>
+    </form>
+  </div>
+
+  <div class="toast" id="toast"><i data-lucide="check-circle-2"></i><span></span></div>
+  <script src="js/app.js"></script>
+</body>
+</html>
