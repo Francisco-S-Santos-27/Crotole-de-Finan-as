@@ -24,6 +24,37 @@ const monthKey = d => d.slice(0,7);
 const fmtDate = d => new Date(d+"T12:00:00").toLocaleDateString("pt-BR",{day:"2-digit",month:"short"}).replace(".","");
 const save = () => { localStorage.setItem(KEY,JSON.stringify(transactions)); localStorage.setItem(CAT_KEY,JSON.stringify(categories)); };
 
+let installPrompt;
+const installButton = $("#installApp");
+
+window.addEventListener("beforeinstallprompt", event => {
+  event.preventDefault();
+  installPrompt = event;
+  installButton.hidden = false;
+});
+
+installButton.addEventListener("click", async () => {
+  if (!installPrompt) return;
+  installPrompt.prompt();
+  const { outcome } = await installPrompt.userChoice;
+  installPrompt = null;
+  installButton.hidden = true;
+  if (outcome === "accepted") toast("Aplicativo instalado com sucesso.");
+});
+
+window.addEventListener("appinstalled", () => {
+  installPrompt = null;
+  installButton.hidden = true;
+});
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch(error => {
+      console.error("Falha ao registrar o service worker:", error);
+    });
+  });
+}
+
 function seed(){
   if(transactions.length) return;
   const y = today.getFullYear(), m = String(today.getMonth()+1).padStart(2,"0");

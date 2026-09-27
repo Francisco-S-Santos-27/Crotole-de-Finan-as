@@ -1,0 +1,20 @@
+{
+  "name": "FinanceFlow - Controle Financeiro",
+  "short_name": "FinanceFlow",
+  "description": "Controle suas entradas, despesas e categorias financeiras.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#080d12",
+  "theme_color": "#0b1117",
+  "icons": [
+    {
+      "src": "assets/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
