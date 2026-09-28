@@ -1,10 +1,12 @@
-const CACHE_NAME = "financeflow-v1";
+const CACHE_NAME = "financeflow-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./css/style.css",
   "./js/app.js",
+  "./js/storage.js",
+  "./js/utils.js",
   "./assets/app-icon.svg"
 ];
 

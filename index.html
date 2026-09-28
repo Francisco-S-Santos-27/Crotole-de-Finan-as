@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b1117">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>FinanceFlow — Controle Financeiro</title>
+  <title>Controle Financeiro</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,6 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -21,7 +22,7 @@
     <aside class="sidebar" id="sidebar">
       <div class="brand">
         <div class="brand-mark"><i data-lucide="wallet-cards"></i></div>
-        <div><strong>FinanceFlow</strong><span>Controle inteligente</span></div>
+        <div><strong>Controle Financeiro</strong><span>Controle inteligente</span></div>
       </div>
 
       <nav class="nav">
@@ -47,7 +48,10 @@
           <p class="eyebrow">Visão geral</p>
           <h1>Minhas finanças</h1>
         </div>
-        <button class="primary-btn" id="openModal"><i data-lucide="plus"></i><span>Novo lançamento</span></button>
+        <div class="topbar-actions">
+          <button class="icon-btn" id="themeToggle" aria-label="Alternar tema"><i data-lucide="sun-medium"></i></button>
+          <button class="primary-btn" id="openModal"><i data-lucide="plus"></i><span>Novo lançamento</span></button>
+        </div>
       </header>
 
       <section class="content">
@@ -57,7 +61,16 @@
               <h2>Resumo financeiro</h2>
               <p id="currentPeriod">Este mês</p>
             </div>
-            <input type="month" id="monthFilter">
+            <div class="month-actions">
+              <input type="month" id="monthFilter">
+              <div class="export-menu">
+                <button class="icon-btn" id="reportExport" type="button" aria-label="Baixar relatório" title="Baixar relatório"><i data-lucide="download"></i></button>
+                <div class="export-options" id="reportExportOptions">
+                  <button type="button" data-report-format="png"><i data-lucide="image"></i>Baixar PNG</button>
+                  <button type="button" data-report-format="pdf"><i data-lucide="file-text"></i>Baixar PDF</button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="cards">
@@ -78,6 +91,39 @@
               <div><span>Taxa de economia</span><strong id="savingRate">0%</strong><small>Entradas que sobraram</small></div>
             </article>
           </div>
+
+          <article class="panel insight-panel">
+            <div class="panel-head">
+              <div>
+                <h3>Resumo do mês</h3>
+                <p>Comparativo e meta financeira</p>
+              </div>
+              <button class="text-btn" id="setBudget" type="button">Definir meta <i data-lucide="target"></i></button>
+            </div>
+            <div class="insight-grid">
+              <div class="insight-box">
+                <span>Comparativo mensal</span>
+                <strong id="monthComparison">0%</strong>
+                <small id="monthComparisonText">Sem comparação ainda</small>
+              </div>
+              <div class="insight-box">
+                <span>Meta de gastos</span>
+                <strong id="budgetProgress">0%</strong>
+                <small id="budgetProgressText">Meta: R$ 0,00</small>
+                <div class="progress-bar"><span id="budgetBar"></span></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel upcoming-panel">
+            <div class="panel-head">
+              <div>
+                <h3>Próximas despesas</h3>
+                <p>Pagamentos e compromissos do mês</p>
+              </div>
+            </div>
+            <div id="upcomingExpenses" class="upcoming-list"></div>
+          </article>
 
           <div class="grid-2">
             <article class="panel chart-panel">
@@ -103,7 +149,10 @@
         <div id="transactions" class="section">
           <div class="page-heading">
             <div><p class="eyebrow">Controle</p><h2>Movimentações</h2><p>Gerencie todas as suas entradas e saídas.</p></div>
-            <button class="primary-btn" id="openModal2"><i data-lucide="plus"></i>Novo lançamento</button>
+            <div class="page-actions">
+              <button class="primary-btn" id="openModal2"><i data-lucide="plus"></i>Novo lançamento</button>
+              <button class="icon-btn" id="exportCsv" type="button" aria-label="Exportar CSV"><i data-lucide="download"></i></button>
+            </div>
           </div>
           <article class="panel">
             <div class="filters">
@@ -128,8 +177,9 @@
 
   <div class="overlay" id="overlay"></div>
   <div class="modal" id="transactionModal" role="dialog" aria-modal="true">
-    <div class="modal-head"><div><h2>Novo lançamento</h2><p>Registre uma entrada ou saída.</p></div><button class="icon-btn" id="closeModal"><i data-lucide="x"></i></button></div>
+    <div class="modal-head"><div><h2 id="modalTitle">Novo lançamento</h2><p id="modalSubtitle">Registre uma entrada ou saída.</p></div><button class="icon-btn" id="closeModal"><i data-lucide="x"></i></button></div>
     <form id="transactionForm">
+      <input type="hidden" name="id" value="">
       <div class="type-toggle">
         <label><input type="radio" name="type" value="income" checked><span><i data-lucide="arrow-down-left"></i> Entrada</span></label>
         <label><input type="radio" name="type" value="expense"><span><i data-lucide="arrow-up-right"></i> Saída</span></label>
@@ -148,7 +198,7 @@
     </form>
   </div>
 
-  <div class="toast" id="toast"><i data-lucide="check-circle-2"></i><span></span></div>
-  <script src="js/app.js"></script>
+  <div class="toast" id="toast" aria-live="polite"><i data-lucide="check-circle-2"></i><span></span></div>
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>
